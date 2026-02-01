@@ -8,6 +8,7 @@ COPY ["src/ApiTemplate.Domain/ApiTemplate.Domain.csproj", "src/ApiTemplate.Domai
 COPY ["src/ApiTemplate.Application/ApiTemplate.Application.csproj", "src/ApiTemplate.Application/"]
 COPY ["src/ApiTemplate.Infrastructure/ApiTemplate.Infrastructure.csproj", "src/ApiTemplate.Infrastructure/"]
 COPY ["src/ApiTemplate.API/ApiTemplate.API.csproj", "src/ApiTemplate.API/"]
+COPY ["tests/ApiTemplate.Tests/ApiTemplate.Tests.csproj", "tests/ApiTemplate.Tests/"]
 
 # Restore dependencies
 RUN dotnet restore
