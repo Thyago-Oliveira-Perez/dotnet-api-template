@@ -1,0 +1,51 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.dll
+*.exe
+*.pdb
+*.swp
+*.*~
+project.lock.json
+.DS_Store
+*.pyc
+*.orig
+.nuget/
+dist/
+downloads/
+artifacts/
+msbuild.log
+msbuild.err
+msbuild.wrn
+
+# Visual Studio
+.vs/
+*.csproj.user
+*.dbmdl
+*.jfm
+_ReSharper.*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# Rider
+.idea/
+*.sln.iml
+
+# Logs
+logs/
+*.log
+
+# Environment files
+.env
+.env.local
+
+# Docker
+docker-compose.override.yml
+
+# Database
+*.db
+*.db-shm
+*.db-wal
