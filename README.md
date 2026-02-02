@@ -1,160 +1,425 @@
-# .NET 8 Production API Template
+# .NET 8 Production-Ready API Template
 
-A clean, scalable and ready-for-production .NET 8 Web API template designed to accelerate backend development with best practices.
+A clean, scalable, and production-ready .NET 8 Web API template following Clean Architecture principles with built-in observability and code quality tools.
 
-## 🚀 Key Features
-- 🧱 Clean Architecture (separation of concerns)
-- 🔄 RESTful API with structured routing
-- 🪵 EF Core with migrations and best practices
-- 📈 Health checks, logging (Serilog), OpenAPI/Swagger
-- 🐳 Docker support (dev/prod)
-- 🔐 Environment config & secrets
-- 📦 CI/CD friendly
+## ⚡ Quick Start
 
-## 📌 Why this template?
-This repo helps teams start backend projects with:
-- Focus on maintainability & extensibility
-- Minimal boilerplate
-- Production-ready defaults
+Get started in under 5 minutes:
 
-## ⚙️ Tech Stack
-- .NET 8
-- C#
-- Entity Framework Core
-- Serilog
-- Docker
-- Swagger / OpenAPI
+```bash
+# Clone the repository
+git clone https://github.com/Thyago-Oliveira-Perez/dotnet-api-template
+cd dotnet-api-template
 
-## 🏗️ Project Structure
+# Option 1: Run with Docker (recommended - includes observability stack)
+docker-compose up -d
+
+# Option 2: Run locally (requires .NET 8)
+mise trust && mise install  # Or install .NET 8 manually
+dotnet run --project src/ApiTemplate.API
+```
+
+**Access the application:**
+- API: http://localhost:5000/swagger
+- Kibana (logs): http://localhost:5601
+- Health: http://localhost:5000/health
+
+📖 **New to this template?** See the [Quick Start Guide](QUICKSTART.md) for detailed setup instructions.
+
+## 🎯 What's Included
+
+### Core Features
+- ✅ **Clean Architecture** - Domain, Application, Infrastructure, API layers
+- ✅ **Entity Framework Core 8** - With migrations and SQL Server support
+- ✅ **Repository & Unit of Work** - Clean data access patterns
+- ✅ **RESTful API** - Full CRUD example with Products controller
+- ✅ **Swagger/OpenAPI** - Interactive API documentation
+- ✅ **Health Checks** - Monitor application and database health
+- ✅ **Docker Support** - Multi-stage builds for dev and production
+
+### Observability Stack
+- 📊 **Elasticsearch** - Centralized log storage and search
+- 📈 **Kibana** - Log visualization and analysis
+- 🔍 **Elastic APM** - Application performance monitoring
+- 🪵 **Serilog** - Structured logging with ECS format
+- 📉 **Distributed Tracing** - Track requests across the application
+
+### Code Quality Tools
+- 🔬 **SonarAnalyzer.CSharp** - Bug detection and security analysis
+- 📐 **Meziantou.Analyzer** - Best practices and performance suggestions
+- 💡 **Roslynator.Analyzers** - 500+ code analysis rules
+- ✨ **EditorConfig** - Consistent code style enforcement
+
+### DevOps Ready
+- 🐳 **Docker Compose** - Full stack with single command
+- 🔄 **GitHub Actions** - CI/CD pipeline included
+- 🔧 **mise config** - Version management for .NET SDK
+- 🧪 **Unit Tests** - Comprehensive test coverage (32 tests)
+
+## 📌 Why This Template?
+
+Skip the boilerplate and start with:
+- Production-ready architecture
+- Enterprise-grade observability
+- Automated code quality checks
+- Complete working example
+
+## 🛠️ Tech Stack
+
+- **.NET 8** - Latest LTS version
+- **Entity Framework Core** - ORM with migrations
+- **Serilog** - Structured logging with ECS format
+- **Elasticsearch** - Log storage and search
+- **Kibana** - Log visualization and dashboards
+- **Elastic APM** - Performance monitoring
+- **Docker & Docker Compose** - Containerization
+- **Swagger/OpenAPI** - API documentation
+- **xUnit, Moq, FluentAssertions** - Testing stack
+- **Code Analyzers** - SonarAnalyzer, Meziantou, Roslynator
+
+## 📁 Project Structure
 
 ```
 src/
-├── ApiTemplate.Domain/          # Domain entities and business logic
-│   ├── Common/                  # Base entities
+├── ApiTemplate.Domain/          # Domain entities and business rules
+│   ├── Common/                  # Base entities with audit fields
 │   └── Entities/                # Domain models (Product, etc.)
+│
 ├── ApiTemplate.Application/     # Application logic and interfaces
 │   ├── DTOs/                    # Data Transfer Objects
-│   ├── Interfaces/              # Repository and UoW interfaces
-│   └── Services/                # Business services
+│   ├── Interfaces/              # Repository and service contracts
+│   └── Services/                # Business logic implementation
+│
 ├── ApiTemplate.Infrastructure/  # Data access and external services
-│   ├── Data/                    # DbContext and configurations
+│   ├── Data/                    # DbContext and EF configurations
 │   └── Repositories/            # Repository implementations
-└── ApiTemplate.API/             # Web API layer
-    └── Controllers/             # API endpoints
+│
+└── ApiTemplate.API/             # Web API and presentation layer
+    └── Controllers/             # REST API endpoints
+
+tests/
+└── ApiTemplate.Tests/           # Unit tests for all layers
 ```
+
+📖 **Learn more:** [Architecture Documentation](ARCHITECTURE.md)
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- [mise](https://mise.jdx.dev/) - For managing .NET SDK version (or .NET 8 SDK installed manually)
-- SQL Server or Docker (for database)
 
-### Using mise (Recommended)
+**Option 1: With mise (Recommended)**
+- [mise](https://mise.jdx.dev/) for .NET version management
+- Docker and Docker Compose (for full stack)
 
-1. **Clone the repository**:
+**Option 2: Manual**
+- .NET 8 SDK
+- SQL Server (or Docker)
+
+### Installation
+
+1. **Clone and setup**
 ```bash
 git clone https://github.com/Thyago-Oliveira-Perez/dotnet-api-template
 cd dotnet-api-template
+mise trust && mise install  # Or ensure .NET 8 is installed
 ```
 
-2. **Trust and install .NET via mise**:
-```bash
-mise trust
-mise install
+2. **Configure database**
+Edit `src/ApiTemplate.API/appsettings.json`:
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=ApiTemplate;..."
+  }
+}
 ```
 
-3. **Update connection string**:
-Edit `src/ApiTemplate.API/appsettings.json` and configure your database connection.
-
-4. **Build & Run**:
+3. **Run migrations**
 ```bash
-dotnet build
-dotnet run --project src/ApiTemplate.API/ApiTemplate.API.csproj
+dotnet ef database update --project src/ApiTemplate.Infrastructure --startup-project src/ApiTemplate.API
+```
+
+4. **Start the application**
+```bash
+# Local development
+dotnet run --project src/ApiTemplate.API
+
+# Or with Docker (includes Elasticsearch, Kibana, APM)
+docker-compose up -d
+```
+
+### Verify Installation
+
+```bash
+# Check health
+curl http://localhost:5000/health
+
+# Try the API
+curl http://localhost:5000/api/products
+
+# Open Swagger UI
+open http://localhost:5000/swagger
+
+# View logs in Kibana (if using Docker)
+open http://localhost:5601
 ```
 
 ### Using Docker Compose
 
-1. **Start the application with Docker**:
-```bash
-docker-compose up --build
-```
-
-This will start:
-- API on `http://localhost:5000` and `https://localhost:5001`
-- SQL Server on `localhost:1433`
-
-2. **Access Swagger UI**:
-Open `http://localhost:5000/swagger` in your browser
-
-### Database Migrations
-
-Create and apply migrations using EF Core tools:
+**Start everything with one command:**
 
 ```bash
-# Install EF Core tools globally
-dotnet tool install --global dotnet-ef
-
-# Create a migration
-dotnet ef migrations add [migration name] --project src/ApiTemplate.Infrastructure --startup-project src/ApiTemplate.API
-
-# Update the database
-dotnet ef database update --project src/ApiTemplate.Infrastructure --startup-project src/ApiTemplate.API
+docker-compose up -d
 ```
 
-## 📊 Architecture Principles
+This starts:
+- **API**: http://localhost:5000 (Swagger: /swagger)
+- **SQL Server**: localhost:1433
+- **Elasticsearch**: localhost:9200
+- **Kibana**: http://localhost:5601
+- **APM Server**: localhost:8200
 
-- **Single Responsibility**: Each layer has a distinct purpose
-- **Explicit boundaries between layers**: Dependencies flow inward
-- **DI for flexibility & testability**: Constructor injection throughout
-- **Repository Pattern**: Abstract data access
-- **Unit of Work**: Manage transactions
+**Verify it's working:**
 
-## 🔧 Development
+```bash
+# Check health
+curl http://localhost:5000/health
 
-### API Endpoints
+# Try the API
+curl http://localhost:5000/api/products
 
-- `GET /api/products` - Get all products
-- `GET /api/products/{id}` - Get product by ID
-- `POST /api/products` - Create a new product
-- `PUT /api/products/{id}` - Update a product
-- `DELETE /api/products/{id}` - Delete a product
-- `GET /health` - Health check endpoint
+# Open Swagger
+open http://localhost:5000/swagger
+```
+
+Services take ~2 minutes to fully initialize.
+
+## 📊 Observability
+
+### Built-in Monitoring
+
+The template includes enterprise-grade observability out of the box:
+
+**Logging**
+- Structured logs in ECS (Elastic Common Schema) format
+- Automatic log shipping to Elasticsearch
+- Console and file output for local development
+- Correlation IDs for request tracking
+
+**Application Performance Monitoring (APM)**
+- Request/response tracking
+- Database query performance
+- Error rates and stack traces
+- Response time percentiles (p95, p99)
+- Distributed tracing
+
+### Using Kibana
+
+After starting with Docker Compose:
+
+1. **View Logs**
+   - Open http://localhost:5601
+   - Go to **Discover**
+   - View real-time logs with filtering
+
+2. **Monitor Performance**
+   - Go to **Observability → APM**
+   - View service overview, transactions, and errors
+
+3. **Create Dashboards**
+   - Go to **Dashboard → Create dashboard**
+   - Add visualizations for custom metrics
 
 ### Configuration
 
-- `appsettings.json` - Production settings
-- `appsettings.Development.json` - Development settings
-- Connection strings
-- Serilog configuration
+**appsettings.json:**
+```json
+{
+  "Elasticsearch": {
+    "Uri": "http://localhost:9200",
+    "IndexFormat": "apitemplate-logs-{0:yyyy.MM.dd}"
+  },
+  "ElasticApm": {
+    "ServiceName": "ApiTemplate",
+    "ServerUrl": "http://localhost:8200",
+    "Environment": "Development"
+  }
+}
+```
 
-### Logging
+**Disable observability for local development:**
+```bash
+# Run without Docker - logs to console/file only
+dotnet run --project src/ApiTemplate.API
+```
 
-Logs are written to:
-- Console (colored output)
-- File (`logs/api-{date}.txt`)
+## 🔬 Code Quality
 
-## 🐳 Docker
+### Built-in Analyzers
 
-Build and run with Docker:
+Three powerful analyzers run automatically during build:
+
+1. **SonarAnalyzer.CSharp**
+   - Detects bugs and code smells
+   - Security vulnerability detection
+   - Cognitive complexity analysis
+
+2. **Meziantou.Analyzer**
+   - Performance best practices
+   - Modern C# pattern suggestions
+   - API usage recommendations
+
+3. **Roslynator.Analyzers**
+   - 500+ code quality rules
+   - Code style enforcement
+   - Refactoring suggestions
+
+### Configuration
+
+Rules are configured in `.editorconfig`:
+
+```ini
+# Example: Adjust severity levels
+dotnet_diagnostic.S125.severity = warning    # Remove commented code
+dotnet_diagnostic.MA0004.severity = warning   # Use ConfigureAwait
+dotnet_diagnostic.RCS1036.severity = suggestion  # Remove empty lines
+```
+
+### Usage
 
 ```bash
-# Build image
-docker build -t dotnet-api-template .
+# Analyzers run automatically on build
+dotnet build
 
-# Run container
-docker run -p 5000:8080 -p 5001:8081 dotnet-api-template
+# View all warnings
+dotnet build | grep warning
+
+# Treat warnings as errors in CI
+dotnet build -warnaserror
 ```
+
+💡 **Tip:** Your IDE shows analyzer suggestions in real-time as you code!
 
 ## 🧪 Testing
 
+Comprehensive unit tests for all layers:
+
 ```bash
+# Run all tests
 dotnet test
+
+# With coverage
+dotnet test /p:CollectCoverage=true
+
+# Run specific test
+dotnet test --filter "FullyQualifiedName~ProductService"
 ```
 
-## 🧪 How to Contribute
+**Test Coverage (32 tests):**
+- ✅ Domain Layer: Entity validation and business rules
+- ✅ Application Layer: Service logic with mocked dependencies
+- ✅ Infrastructure Layer: Repository and Unit of Work patterns
+- ✅ API Layer: Controller endpoints and HTTP responses
 
-PRs and feedback welcome — follow the [CONTRIBUTING.md](./CONTRIBUTING.md) guidelines!
+## 🐳 Docker
+
+### Development
+
+```bash
+# Start full stack (API + SQL + Elasticsearch + Kibana + APM)
+docker-compose up -d
+
+# View logs
+docker-compose logs -f api
+
+# Stop all services
+docker-compose down
+```
+
+### Production
+
+Build optimized image:
+
+```bash
+docker build -t dotnet-api-template:latest .
+docker run -p 8080:8080 dotnet-api-template:latest
+```
+
+### Services
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| API | 5000, 5001 | Web API |
+| SQL Server | 1433 | Database |
+| Elasticsearch | 9200 | Log storage |
+| Kibana | 5601 | Log visualization |
+| APM Server | 8200 | Performance monitoring |
+
+## 🔧 Development Workflow
+
+### Making Changes
+
+1. **Update domain models** in `ApiTemplate.Domain/Entities`
+2. **Add business logic** in `ApiTemplate.Application/Services`
+3. **Implement data access** in `ApiTemplate.Infrastructure/Repositories`
+4. **Create API endpoints** in `ApiTemplate.API/Controllers`
+5. **Write tests** in `ApiTemplate.Tests`
+
+### Database Migrations
+
+```bash
+# Create migration
+dotnet ef migrations add <MigrationName> \
+  --project src/ApiTemplate.Infrastructure \
+  --startup-project src/ApiTemplate.API
+
+# Apply migration
+dotnet ef database update \
+  --project src/ApiTemplate.Infrastructure \
+  --startup-project src/ApiTemplate.API
+
+# Rollback
+dotnet ef database update <PreviousMigration> \
+  --project src/ApiTemplate.Infrastructure \
+  --startup-project src/ApiTemplate.API
+```
+
+### API Endpoints
+
+Example endpoints included:
+
+- `GET /api/products` - List all products
+- `GET /api/products/{id}` - Get product by ID
+- `POST /api/products` - Create new product
+- `PUT /api/products/{id}` - Update product
+- `DELETE /api/products/{id}` - Delete product
+- `GET /health` - Health check
+
+## 📚 Documentation
+
+- **[Quick Start Guide](QUICKSTART.md)** - Step-by-step setup instructions
+- **[Architecture Documentation](ARCHITECTURE.md)** - Design decisions and patterns
+- **[Contributing Guidelines](CONTRIBUTING.md)** - How to contribute
+
+## 🤝 Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## 📄 License
 
-MIT License
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+Built with:
+- .NET 8
+- Entity Framework Core
+- Serilog
+- Elastic Stack (Elasticsearch, Kibana, APM)
+- Code Analyzers (SonarAnalyzer, Meziantou, Roslynator)
+
+---
+
+**Made with ❤️ for the .NET community**
+
+Ready to start your next project? Clone this template and start building! 🚀

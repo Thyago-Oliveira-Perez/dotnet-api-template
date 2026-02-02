@@ -3,17 +3,40 @@ using ApiTemplate.Application.Services;
 using ApiTemplate.Domain.Entities;
 using ApiTemplate.Infrastructure.Data;
 using ApiTemplate.Infrastructure.Repositories;
+using Elastic.Apm.NetCoreAll;
+using Elastic.CommonSchema.Serilog;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Serilog.Sinks.Elasticsearch;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Serilog
+// Configure Serilog with Elasticsearch
+var elasticsearchUri = builder.Configuration["Elasticsearch:Uri"] ?? "http://localhost:9200";
+var indexFormat = builder.Configuration["Elasticsearch:IndexFormat"] ?? "apitemplate-logs-{0:yyyy.MM.dd}";
+
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
-    .WriteTo.Console()
-    .WriteTo.File("logs/api-.txt", rollingInterval: RollingInterval.Day)
+    .Enrich.WithMachineName()
+    .Enrich.WithEnvironmentName()
+    .Enrich.WithProperty("Application", "ApiTemplate")
+    .WriteTo.Console(new EcsTextFormatter())
+    .WriteTo.File(
+        new EcsTextFormatter(),
+        "logs/api-.txt",
+        rollingInterval: RollingInterval.Day)
+    .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(elasticsearchUri))
+    {
+        IndexFormat = indexFormat,
+        AutoRegisterTemplate = true,
+        AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv7,
+        EmitEventFailure = EmitEventFailureHandling.WriteToSelfLog,
+        FailureCallback = e => Console.WriteLine($"Unable to submit event to Elasticsearch: {e.MessageTemplate}"),
+        ModifyConnectionSettings = x => x.BasicAuthentication(
+            builder.Configuration["Elasticsearch:Username"],
+            builder.Configuration["Elasticsearch:Password"])
+    })
     .CreateLogger();
 
 builder.Host.UseSerilog();
@@ -49,6 +72,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Enable Elastic APM
+app.UseAllElasticApm(builder.Configuration);
 
 app.UseHttpsRedirection();
 
