@@ -11,28 +11,33 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080;https://+:8081
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=ApiTemplateDb;User Id=sa;Password=YourStrong@Password123;TrustServerCertificate=True;MultipleActiveResultSets=true
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=apitemplatedb;Username=postgres;Password=postgres
       - Elasticsearch__Uri=http://elasticsearch:9200
       - ElasticApm__ServerUrl=http://apm-server:8200
     depends_on:
-      - sqlserver
+      - postgres
       - elasticsearch
       - apm-server
     networks:
       - api-network
 
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+  postgres:
+    image: postgres:16-alpine
     environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=YourStrong@Password123
-      - MSSQL_PID=Developer
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=apitemplatedb
     ports:
-      - "1433:1433"
+      - "5432:5432"
     volumes:
-      - sqlserver-data:/var/opt/mssql
+      - postgres-data:/var/lib/postgresql/data
     networks:
       - api-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
@@ -97,5 +102,5 @@ networks:
     driver: bridge
 
 volumes:
-  sqlserver-data:
+  postgres-data:
   elasticsearch-data:

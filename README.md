@@ -30,12 +30,13 @@ dotnet run --project src/ApiTemplate.API
 
 ### Core Features
 - ✅ **Clean Architecture** - Domain, Application, Infrastructure, API layers
-- ✅ **Entity Framework Core 8** - With migrations and SQL Server support
+- ✅ **Entity Framework Core 8** - With migrations and PostgreSQL support
 - ✅ **Repository & Unit of Work** - Clean data access patterns
 - ✅ **RESTful API** - Full CRUD example with Products controller
 - ✅ **Swagger/OpenAPI** - Interactive API documentation
 - ✅ **Health Checks** - Monitor application and database health
 - ✅ **Docker Support** - Multi-stage builds for dev and production
+- ✅ **Testcontainers** - Real database integration tests for CI/CD
 
 ### Observability Stack
 - 📊 **Elasticsearch** - Centralized log storage and search
@@ -52,9 +53,10 @@ dotnet run --project src/ApiTemplate.API
 
 ### DevOps Ready
 - 🐳 **Docker Compose** - Full stack with single command
-- 🔄 **GitHub Actions** - CI/CD pipeline included
+- 🔄 **GitHub Actions** - CI/CD pipeline with Docker support
 - 🔧 **mise config** - Version management for .NET SDK
-- 🧪 **Unit Tests** - Comprehensive test coverage (32 tests)
+- 🧪 **Integration Tests** - End-to-end API tests with Testcontainers (17 tests)
+- 🎯 **Domain Tests** - Unit tests for business logic (7 tests)
 
 ## 📌 Why This Template?
 
@@ -68,13 +70,15 @@ Skip the boilerplate and start with:
 
 - **.NET 8** - Latest LTS version
 - **Entity Framework Core** - ORM with migrations
+- **PostgreSQL 16** - Lightweight, fast, open-source database
+- **Testcontainers** - Real database integration tests
 - **Serilog** - Structured logging with ECS format
 - **Elasticsearch** - Log storage and search
 - **Kibana** - Log visualization and dashboards
 - **Elastic APM** - Performance monitoring
 - **Docker & Docker Compose** - Containerization
 - **Swagger/OpenAPI** - API documentation
-- **xUnit, Moq, FluentAssertions** - Testing stack
+- **xUnit & FluentAssertions** - Testing framework
 - **Code Analyzers** - SonarAnalyzer, Meziantou, Roslynator
 
 ## 📁 Project Structure
@@ -113,7 +117,7 @@ tests/
 
 **Option 2: Manual**
 - .NET 8 SDK
-- SQL Server (or Docker)
+- PostgreSQL (or Docker)
 
 ### Installation
 
@@ -129,7 +133,7 @@ Edit `src/ApiTemplate.API/appsettings.json`:
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=ApiTemplate;..."
+    "DefaultConnection": "Host=localhost;Database=apitemplatedb;Username=postgres;Password=postgres"
   }
 }
 ```
@@ -174,7 +178,7 @@ docker-compose up -d
 
 This starts:
 - **API**: http://localhost:5000 (Swagger: /swagger)
-- **SQL Server**: localhost:1433
+- **PostgreSQL**: localhost:5432
 - **Elasticsearch**: localhost:9200
 - **Kibana**: http://localhost:5601
 - **APM Server**: localhost:8200
@@ -302,24 +306,30 @@ dotnet build -warnaserror
 
 ## 🧪 Testing
 
-Comprehensive unit tests for all layers:
+The template includes both unit tests and end-to-end integration tests:
 
 ```bash
-# Run all tests
+# Run all tests (requires Docker for Testcontainers)
 dotnet test
 
 # With coverage
 dotnet test /p:CollectCoverage=true
 
 # Run specific test
-dotnet test --filter "FullyQualifiedName~ProductService"
+dotnet test --filter "FullyQualifiedName~Product"
 ```
 
-**Test Coverage (32 tests):**
-- ✅ Domain Layer: Entity validation and business rules
-- ✅ Application Layer: Service logic with mocked dependencies
-- ✅ Infrastructure Layer: Repository and Unit of Work patterns
-- ✅ API Layer: Controller endpoints and HTTP responses
+**Test Strategy:**
+- ✅ **Domain Tests (7 tests):** Entity validation and business rules
+- ✅ **Integration Tests (10 tests):** End-to-end API tests with real PostgreSQL database
+  - Uses Testcontainers to spin up postgres:16-alpine container
+  - Tests complete HTTP request/response cycles
+  - Validates database persistence and queries
+  - Runs in ~17 seconds, suitable for CI/CD pipelines
+
+**Requirements:**
+- Docker must be running for integration tests (Testcontainers)
+- GitHub Actions runners have Docker pre-installed
 
 ## 🐳 Docker
 
@@ -350,7 +360,7 @@ docker run -p 8080:8080 dotnet-api-template:latest
 | Service | Port | Purpose |
 |---------|------|---------|
 | API | 5000, 5001 | Web API |
-| SQL Server | 1433 | Database |
+| PostgreSQL | 5432 | Database |
 | Elasticsearch | 9200 | Log storage |
 | Kibana | 5601 | Log visualization |
 | APM Server | 8200 | Performance monitoring |

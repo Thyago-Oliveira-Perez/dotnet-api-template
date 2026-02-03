@@ -32,7 +32,7 @@ Log.Logger = new LoggerConfiguration()
         AutoRegisterTemplate = true,
         AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv7,
         EmitEventFailure = EmitEventFailureHandling.WriteToSelfLog,
-        FailureCallback = e => Console.WriteLine($"Unable to submit event to Elasticsearch: {e.MessageTemplate}"),
+        FailureCallback = (e, ex) => Console.WriteLine($"Unable to submit event to Elasticsearch: {e.MessageTemplate}"),
         ModifyConnectionSettings = x => x.BasicAuthentication(
             builder.Configuration["Elasticsearch:Username"],
             builder.Configuration["Elasticsearch:Password"])
@@ -48,9 +48,9 @@ builder.Services.AddSwaggerGen();
 
 // Database context
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(
+    options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        sqlOptions => sqlOptions.EnableRetryOnFailure()
+        npgsqlOptions => npgsqlOptions.EnableRetryOnFailure()
     ));
 
 // Register repositories
@@ -98,3 +98,6 @@ finally
 {
     Log.CloseAndFlush();
 }
+
+// Make Program class accessible for integration tests
+public partial class Program { }
