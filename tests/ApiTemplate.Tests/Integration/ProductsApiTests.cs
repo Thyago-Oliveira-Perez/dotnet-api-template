@@ -1,17 +1,24 @@
 using System.Net;
 using System.Net.Http.Json;
 using ApiTemplate.Application.DTOs;
+using ApiTemplate.Infrastructure.Data;
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ApiTemplate.Tests.Integration;
 public class ProductsApiTests(IntegrationTestWebAppFactory factory) : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 {
     private HttpClient client = null!;
 
-    public Task InitializeAsync()
+    public async Task InitializeAsync()
     {
         client = factory.CreateClient();
-        return Task.CompletedTask;
+        
+        // Clean the database before each test
+        using IServiceScope scope = factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await dbContext.Database.EnsureDeletedAsync();
+        await dbContext.Database.EnsureCreatedAsync();
     }
 
     public Task DisposeAsync()
